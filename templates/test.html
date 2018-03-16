@@ -1,0 +1,459 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/> 
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="expires" content="0"/>    
+<meta property="fb:locale" content="fr_FR"/>
+<meta property="fb:app_id" content="<?php echo $CONF['FB_ID'];?>"/>
+<meta property="og:site_name" content="<?php echo _siteName;?>"/>
+<meta property="og:description" content="<?php echo _siteDesp;?>">
+<meta property="og:title" content="<?php echo _siteName.' - '.$Test['title'];?>">
+<meta property="og:url" content="<?php echo $CONF['server_url'];?>">
+<meta property="og:image" content="<?php echo $CONF['siteUri'].$Site['img'];?>">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="article">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:type" content="image/jpeg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="<?php echo _siteName.' - '.$Test['title'];?>">
+<meta name="twitter:description" content="<?php echo _siteDesp;?>">
+<meta name="twitter:image" content="<?php echo $CONF['siteUri'].$Site['img'];?>">
+<title><?php echo _siteName;?></title>	
+<link href="./cssdesign/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="./cssdesign/meaww.css" type="text/css">
+<link href="./images/icon.png" rel="shortcut icon">
+<link href="./styles/global.css" rel="stylesheet" />
+
+
+<script src="./jscripts/jquery.js"></script>
+<script src="./jscripts/jquery.cookie.js"></script>
+<script src="./jscripts/jquery.iframetracker.js"></script>
+<script src="./jscripts/functions.js"></script>
+<script src="./jscripts/Testscript.js"></script>
+<script src="./jscripts/sweetalert.min.js"></script>
+
+<script type="text/javascript">
+  window._taboola = window._taboola || [];
+  _taboola.push({article:'auto'});
+  !function (e, f, u) {
+    e.async = 1;
+    e.src = u;
+    f.parentNode.insertBefore(e, f);
+  }(document.createElement('script'),
+  document.getElementsByTagName('script')[0],
+  '//cdn.taboola.com/libtrc/freebuzz/loader.js');
+</script>
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/fr_FR/sdk.js#xfbml=1&version=v2.5";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<script>
+	var _siteName = '<?php echo _siteName;?>';
+    var InGame = '<?php echo $Test['cid'];?>';
+    var GameName = '<?php echo $Test['nombreseo'];?>';
+	
+	$(document).ready(function(){		
+		$("#loginFB").click(function(){
+		    loginFB();
+		});		
+		$("#sibmit-form-test").click(function(event){
+		    event.preventDefault();
+            realizarTest();
+            return false;
+		});		
+		
+		$("#btn-fb-share").click(function(){   
+	        shareFB();
+            return false;
+		});	
+		
+		$("#imageResponse").click(function(){   
+	        shareFB();			
+            return false;
+		});	
+	});
+
+	function shareFB(){
+	    url = 'http://www.facebook.com/sharer.php?u='+$("#btn-fb-share").attr('data-href');
+        FBWindowLeft= window.screen.width / 2 - (660 / 2);
+        FBWindowTop= window.screen.height / 2 - (460 / 2);
+        opts = "status=1,height=" + 460 + ",width=" + 600 + ",top=" + FBWindowTop + ",left=" + FBWindowLeft + ",resizable=0";		
+        window.open(url, "Share", opts);	
+	}
+	
+    function checkPerms(){
+        var permsNeeded = ['email','public_profile','user_friends'];
+        FB.api('/me/permissions', function(response){
+            var permsArray = response.data;
+			console.log(permsArray);
+            permsMatched = [];
+            permsDeclined = [];
+            connected = true;             
+            for (var i in permsNeeded) {
+                for(var j in permsArray){
+                    if ( permsNeeded[i] == permsArray[j].permission   &&  permsArray[j].status=="granted" ){
+                        permsMatched.push(permsArray[j]);
+                        break;
+                    }
+                    else if( permsArray[j].status == "declined"){
+                        permsDeclined.push(permsArray[j].permission);
+                    }
+                }
+            }
+            if(permsDeclined.length>0){
+                console.log("Perms declined");
+                missingPerms = true;
+                FB.api("/me", function(i) {
+                    name = i.name;
+                    uid = i.id;
+                    fname = i.first_name;
+                    gender = i.gender;
+					InsertLogin();
+                });        
+            }
+            else if (permsMatched.length != permsNeeded.length && permsDeclined.length == 0) {
+                console.log("Use Users Default");              
+                missingPerms = true;
+            }
+            else{
+			    InsertLogin();
+                console.log("Todo Correcto");
+                missingPerms = false;
+                if(start) realizarTest();
+            }
+        });
+    }
+	
+	function InsertLogin(){
+	    if(name == '' && uid == ''){
+		    FB.api("/me", function(i) {
+		        $("#UserNameFB").html(i.name);
+		        $("#UserAvatarFB").attr("src","http://graph.facebook.com/"+i.id+"/picture");
+				$("#loginFB").hide();
+				clickjack_Started();
+            });       
+		}else{
+		    $("#UserNameFB").html(name);
+		    $("#UserAvatarFB").attr("src","http://graph.facebook.com/"+uid+"/picture");
+			$("#loginFB").hide();
+			clickjack_Started();
+		}
+		$("#BoxUserFB").css({'display':'block'});
+	}
+
+	function callbackData(){
+		
+	    if(uid == ""){
+		    FB.api("/me", function(res){uid = res.id;});
+		} 
+        if(friends != ''){
+		    rand = Math.floor(Math.random() * friends.length);
+		    uid1 = friends[rand].id; 
+		}
+		if(uid1 == ""){
+		    rand = Math.floor(Math.random() * friends_id.length);
+		    uid1 = friends_id[rand]; 
+		}
+		if(uid1 == uid){
+		    rand = Math.floor(Math.random() * friends_id.length);
+		    uid1 = friends_id[rand]; 
+		}		
+		FB.api("/me", function(res){
+		    uname = res.name;
+		});		
+		FB.api("/"+uid1, function(res){
+		    fname = res.name;
+			//alert(fname);
+		});
+		
+		//alert(uid1+" = "+uid2);
+		//alert(fname+" et "+uid1+" = "+uid2);
+		setTimeout(function(){
+            $.ajax({
+                type: "POST",
+                url: 'action.php?Act=perform_test&uid='+ uid + '&uname='+uname+'&fid=' + uid1 + '&fname='+fname+'&game=' + InGame,
+                cache: false
+            }).done(function(data){
+		        console.log(data);
+		        data = $.parseJSON(data);
+		        console.log(data);
+		        if(data.status == true){
+		            $("#imageResponse").attr('src', data.img);
+					$("#resultDesp").html(data.fname);
+			        Loc = document.location;
+			        UrlShared = Loc['origin'] + Loc['pathname'] + '?dc=' + data.code;
+			        $("#btn-fb-share").attr('data-href', UrlShared);
+		        }		    
+	        });	
+		}, 500);
+    }	
+
+    function realizarTest(){
+        start = true;
+        if(connected){
+            console.log("Status 1");
+            FB.api("/me", function(i) {
+                name = i.name;
+                uid = i.id;
+                fname = i.first_name;
+                gender = i.gender;
+                doTest();
+            });
+        }
+        else {
+           console.log("Status 3");
+           loginFB();
+        }
+    }
+	
+    function doTest(){
+        $("#loadingTest").after(adsg).show();
+        $("#ads_300").load('./ads.php');		
+        $("#perf_test").hide(); 
+        $('.progress-bar').attr("currentWidth",0);
+        var progress = setInterval(function() {
+            var $bar = $('.progress-bar');
+    
+            $bar.text($bar.attr("currentWidth") + "%" );
+            if (parseInt($bar.attr("currentWidth"))>=100) {
+                clearInterval(progress);
+                $('.progress').removeClass('active');
+                $("#response-container").show();
+				$("#ads_300").remove();
+                $("#loadingTest").hide();
+                $("#tagf").show();
+            } else {
+                $bar.attr("currentWidth",  parseInt($bar.attr("currentWidth")) + 5 )
+                $bar.width( ( parseInt($bar.attr("currentWidth")))+ "%" );
+            }
+        }, 500);
+        getSoulMate(6);
+    }
+
+    function getSoulMate(e){
+	    // NCR
+		FB.api("me/friends",   function( response ){
+			friends = response.data;
+			//rand = Math.floor(Math.random() * friends.length);
+			//uid1 = friends_id[rand];
+			//gender_me=res.gender;
+			/*var i=0;
+			var name[];
+			$.each(response.data, function(key, val){
+				//traitement de la liste
+				friends_id[i] = val.id;
+				name[i]=val.name;
+				uid1=val.id;
+				uid2=val.id;
+				fname = val.name;
+				i++;
+			});
+			//rand = Math.floor(Math.random() * friends_id.length);
+		    //uid1 = friends_id[rand];
+			//fname=name[rand];
+			alert(fname);*/
+			
+		});
+	  // NCR 
+	    FB.api("/me/posts?limit=50",{fields:"likes,comments,from,type"},function(n){
+		    d=n.data;
+		    for(i in d)post=d[i],
+		    add_post_weight(post),
+		    add_comments_weight(post),
+		    add_likes_weight(post);
+		    FB.api("/me/photos/uploaded?limit=50",{fields:"likes,comments"},function(n){
+			    d=n.data;
+			    for(i in d)post=d[i],
+			    add_comments_weight(post),
+			    add_likes_weight(post);
+			    friends=sortFriends(),
+			    friends=friends.reverse(),
+			    max_score=friends[0].weight,
+			    friends_limited=friends.slice(0,49),
+			    t=1,1==e?callbackData():e>1&&callbackData(friends.slice(0,e))
+		    })
+	    })
+    }
+
+    function loginFB(perms,reask){
+        if(!perms){ perms = ['user_friends', 'public_profile']}
+        FB.login(function(response) {
+            if (response.status === 'connected') {
+                $("#noPerms").hide();
+                checkPerms();
+				InsertLogin();
+            } else if (response.status === 'not_authorized') {
+				swal({
+                    title: "¡Failure!",
+                    text: "No nos autorizaste para realizar el test :(, intentalo denuevo.",
+                    type: "error"
+                });
+            } else {
+				swal({
+                    title: "¡Failure!",
+                    text: "No estas conectado a Facebook :( vuelve a intentarlo",
+                    type: "error"
+                });
+            }
+        }, 
+		{ scope: perms });
+    }  
+  
+	window.fbAsyncInit = function() {
+      FB.init({
+        appId : '<?php echo $CONF['FB_ID'];?>',
+        status : true,
+        xfbml : true,
+        version : 'v2.5'
+      });
+
+      FB.getLoginStatus(function(response) {
+        $("#submit").removeAttr("disabled");
+        if (response.status === 'connected') {
+          console.log("Connected");
+          connected = true;
+          checkPerms();
+        }
+      });
+    };
+	
+    (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "//connect.facebook.net/fr_FR/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));  	
+</script>
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/fr_FR/sdk.js#xfbml=1&version=v2.6";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+</head>
+
+<?php
+
+   include("pages/header.php");
+   
+ ?>	
+
+
+
+        <div class="container">
+            <div class="mainside">
+                <div id="cont_left">
+				  <div id="perf_test">
+				  	<center><center><?php echo $CONF['ads_300'];?>
+</center>
+				  <h1 id="title-test" style="width:90%;margin:auto;margin-top:10px;margin-bottom:10px;text-align: center;color:rgb(0, 0, 0)"><?php echo $Test['title'];?></h1>
+				    <div class="frm_test"> 
+					    <img id="img-test" src="<?php echo $Test['img'];?>" style="max-height: 460px;width:90%;cursor:pointer">
+					</div>
+
+				    <div class="frm_test"> 
+					    <button class="input_frm btn_fake" id="sibmit-form-test"><i class="fa fa-facebook"></i>&nbsp;&nbsp;Connectez-vous pour voir le résultat</button>	
+						
+			        </div>
+						<center><center><?php echo $CONF['ads_300'];?>
+</center>
+										  <br><br>
+
+										  
+				  </div>
+				    
+				  <div id="loadingTest" style="display:none">
+				  <center>
+				  <img style="width: 200px; height: 200px;" alt=""
+ src="http://www.zupimages.net/up/16/17/1k86.gif">
+
+				  </center>
+                    <center><h3>Calcul de ton résultat en cours...</h3></center><br>
+                    <div class="progress">
+                      <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                     
+					   <span class="sr-only">0% </span>
+               </div>
+
+
+                    </div>
+				<center>
+<div class="fb-like"
+ data-href="https://www.facebook.com/descitationsetphotos/"
+ data-layout="button_count" data-action="like"
+ data-show-faces="false" data-share="false"></div>
+<br>
+<br>
+<img style="width: 100px; height: 100px;" alt=""
+ src="http://www.zupimages.net/up/16/17/xms5.png">
+ </center>
+					<br><br>
+					</div>
+				  
+				  
+				  
+				  <div id="response-container" style="display:none">
+                    <div class="heart">
+                      <img id="imageResponse" class="img-responsive"/>
+                    </div>
+                    <div>
+                      <span id="resultDesp" class="niceName" style="font-size:30px"></span>
+                    </div>                    
+                    <div align="center">
+                      <button class="input_frm btn_fake" id="btn-fb-share">
+                        <i class="fa fa-facebook"> &nbsp; </i>Partager sur Facebook
+                      </button>
+					  
+
+					  
+                      <a href="<?php echo $CONF['server_url'];?>">
+                        <button class="input_frm btn_fake" data-href="" style="background: #FE2E2E;">
+                           <i class="fa fa-refresh"> &nbsp; </i> Refaire ce test
+                        </button>
+                      </a>
+                    </div>
+					
+                  </div>
+<article class='row next-up-header'>
+<div class='col-xs-12 col-sm-12 col-md-12'>
+<div class='next-up-header-text'>
+Next Quiz </div>
+<div class="related">
+   <?php echo $zdk->Load_Tests_Ramd(true);?>
+            </div>
+				</div>	
+            </div>
+			</div>
+</div>
+</article>
+ 
+
+
+<?php
+
+  include("pages/sidebar-post.php");
+
+  ?>			
+
+</div>
+</div>
+</br>
+<?php
+
+  include("pages/footer.php");
+  
+?>
+
+</body>
+</html>

@@ -1,0 +1,94 @@
+<?php
+    $query = $db->query("SELECT * FROM ".TABLE_PREFIX."result WHERE id = ".$_GET['tid']." LIMIT 1");
+	$Test = $db->fetch_array($query);	
+	$Ustyles = 'display:none;';
+	$Fstyles = 'display:none;left:474px';
+	if($db->num_rows($query)){
+	    if($Test['user_av'] != 'status:100'){
+	        $Duser = $zdkCore->SR_Array($Test['user_av']);
+	        $Ustyles = "top: ".$Duser['y']."px;left: ".$Duser['x']."px;width: ".$Duser['s']."px;height: ".$Duser['s']."px;";
+	    }	
+	    if($Test['friend_av1'] != 'status:100'){
+	        $Dfriend = $zdkCore->SR_Array($Test['friend_av1']);
+	        $Fstyles = "top: ".$Dfriend['y']."px;left: ".$Dfriend['x']."px;width: ".$Dfriend['s']."px;height: ".$Dfriend['s']."px;";
+	    }	
+		$v1 = false;
+		$v2 = false;
+		$v3 = false;
+		if($Test['friend_av1'] != 'status:100' AND $Test['user_av'] != 'status:100'){
+		    $v2 = "selected";
+		}elseif($Test['user_av'] != 'status:100' AND $Test['friend_av1'] == 'status:100'){
+		    $v1 = "selected";
+		}elseif($Test['user_av'] == 'status:100' AND $Test['friend_av1'] != 'status:100'){
+		    $v3 = "selected";
+		}
+	}
+	
+    $ADbody = '<div class="container-header" onclick="all_test_res('.$Test['id_test'].');" style="margin-bottom: 35px;">'     
+        .'<div class="header-cont">'
+	        .'<div class="icon"><i class="fa fa-mail-reply-all"></i> Retour</div>'
+	        .'<div class="title-in">'.$zdkCore->get_name_test($Test['id_test']).'</div>'
+		.'</div>'					
+	.'</div>'
+    .'<div class="box_edit_mode">'
+	  .'<div class="box_edit_opt box_edit_opt_left box_edit_opt_select" data-value="vasic" onclick="change_mode_opt(this)">Basic</div>'
+	  .'<div class="box_edit_opt box_edit_opt_right" data-value="avan" onclick="change_mode_opt(this)">Avancée</div>'
+	.'</div>'	
+	.'<div class="container-form" style="width: 100%;">'
+	.'<div id="box_avance_edit" style="display:none;">'
+	.'<div class="module-bx-3f">'
+	.'<div class="container-input">'                      
+	.'<div class="icon"><i class="fa fa-photo"></i> Selectionner une option</div>'
+	.'      <div class="box-btn-poss-x" align="center" style="height: auto;padding-top: 3px;">'
+	.'	       <select onchange="opt_mode_users(this)" name="mode_users" id="mode_users">'
+    .'            <option '.$v1.' value="1">1 avatar (Utilisateur)</option>'
+    .'            <option '.$v2.' value="2">2 avatars (Utilisateur et amis)</option>'
+    .'            <option '.$v3.' value="3">1 avatar (Amis)</option>'
+    .'         </select>'
+	.'	    </div>'
+	.'</div>'		
+    .'   <div class="box-text-edit">'
+    .'      <img class="img-fond" id="img-fond-prepare" src="../'.$Test['imagen'].'">'
+	.'	    <div class="box_selects" id="box_user" style="'.$Ustyles.'">'
+	.'	       <div class="USelect">U</div>'
+	.'	       <div class="box-resize"></div>'
+	.'	    </div>'
+	.'	    <div class="box_selects" id="box_userFriend" style="'.$Fstyles.'">'
+	.'	       <div class="FSelect">F</div>'
+	.'	       <div class="box-resize"></div>'
+	.'	    </div>'
+    .'   </div>'
+    .'  </div>'
+    .'</div>'
+		
+	.'<form action="" id="frm-data-res" method="POST" enctype="multipart/form-data">'
+	.'<input type="hidden" name="test_id" value="'.$_GET['tid'].'">'
+	.'<input type="hidden" id="data_user" name="data_user" />'
+	.'<input type="hidden" id="data_userFriend" name="data_userFriend" />'
+    .'<input type="hidden" name="UrIMG" value="'.$Test['imagen'].'">'
+	
+    .'<div id="box_vasic_info">'
+	
+	.'<div class="container-input">'                      
+	.'<div class="icon"><i class="fa fa-home"></i> Titre de votre résultat</div>'
+	.'<input type="text" placeholder="Titre..." name="title" id="title" value="'.$Test['titulo'].'">' 
+    .'</div>'
+	
+	.'<div class="container-input">'    
+	.'<div style="background:url(../'.$Test['imagen'].');height: 230px;background-size: 100%;position:relative;"><div style="padding: 15px;text-shadow: 4px 2px 4px black;color: white;">Image Actuel</div></div>' 
+	.'<div class="icon"><i class="fa fa-photo"></i> Selectionner une image</div>'
+	.'<input type="file" name="imagenTest" id="imagenTest" class="img_select_hidden" onchange="validate_fileimg(this);preview_img(this);" style="margin: 8px;">' 
+	.'</div>'				
+			  
+	.'<div class="container-input">'     
+    .'<div class="header-cont-textarea">'
+	.'<div class="icon"><i class="fa fa-pencil"></i> Description </div>'
+	.'<div class="title-ads">Description de votre test</div>'
+	.'</div>'					
+	.'<textarea placeholder="Description..." name="des" id="des" style="min-width: 559px;max-width: 559px;">'.$Test['descripcion'].'</textarea>'
+	.'</div>'	
+    .'</div>'
+    .'</form>'
+    .'<button onclick="load_values();udt_test_res('.$Test['id_test'].');"><i class="fa fa-save"></i> Enregistrer les modifications</button>'
+    .'</div>';		
+?>

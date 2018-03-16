@@ -1,0 +1,99 @@
+<html lang="es">
+<head>
+	<meta charset="utf-8"/>
+	<title>Mostrar y Ocultar Div</title>
+	<link rel="stylesheet" href="./inc/style.css">
+	<script type="text/javascript" src="../jscripts/jquery.js"></script>
+	<script type="text/javascript" src="./inc/js/jquery.ui.js"></script>
+	<link type="text/css" href="http://www.desarrolloweb.com/articulos/ejemplos/jquery/ui/interactions/css/blitzer/jquery-ui-1.8.16.custom.css" rel="Stylesheet" id="linkestilo" />
+<script>
+$(document).ready(function(){
+    $('.box_selects').draggable({
+		cursor: 'move',	
+		containment: ".box-text-edit",
+		scroll: false
+	});
+	$( ".box_selects" ).resizable({
+      aspectRatio: 16 / 16,
+	  containment: ".box-text-edit",
+      minHeight: 50,
+      minWidth: 50
+    });
+	var shear_box_select = setInterval(function(){
+	    if($( ".box_body" ).length > 0){
+		    clearInterval(shear_box_select); 
+			console.log("SetInterval Clear");
+			$( "body" ).click(function(){
+			    console.log("clicked body");
+			});
+		}else{
+		    console.log("do Not shear");
+		}
+	},500);
+	$( ".box_body2" ).click(function(){
+		console.log("clicked body, do not shear");
+	});
+	
+	setInterval(function(){
+	    $( ".box_body2" ).click(function(){
+		    console.log("clicked body, do not shear");
+	    });
+	},25000);
+});
+function reloj() {
+    var fObj = new Date() ; 
+    var horas = fObj.getHours() ; 
+    var minutos = fObj.getMinutes() ; 
+    var segundos = fObj.getSeconds() ; 
+    if (horas <= 9) horas = "0" + horas; 
+    if (minutos <= 9) minutos = "0" + minutos; 
+    if (segundos <= 9) segundos = "0" + segundos; 
+	$("body").html(horas+":"+minutos+":"+segundos);
+}
+</script>
+</head>
+<body>
+<div id="arrastrame" class="ui-corner-all ui-state-highlight">Puedes arrastrar esta capa!</div>
+
+<div class="module-bx-3f">
+   <div class="box-btn-poss" style="margin:0px;margin-bottom:10px;">
+      <div class="box-btn-poss-x" align="center" style="height: auto;padding-top: 3px;">
+	       <select onchange="opt_mode_users(this)" name="mode_users" id="mode_users">
+            <option value="1">1 avatar (user)</option>
+            <option value="2">2 avatars (user AND friend)</option>
+            <option value="3">1 avatar (friend)</option>
+         </select>
+    </div>
+      <div class="box-btn-poss-y">
+	       <button class="btn-poss-mn" onclick="size('mn');return false;">Size -</button>
+	       <div class="cont-poss-px" ><input type="text" value="200" id="size_selectd" /></div>
+	       <button class="btn-poss-ms" onclick="size('ms');return false;">Size +</button>	
+	    </div>
+   </div>
+   <div class="box-text-edit" onmousedown="element_pd=this;" style="background: url(http://localhost/testing/images/7328671449190130743000.jpg); background-size: 100% 100%;">
+      <img class="img-fond" id="img-fond-prepare">
+	    <div class="box_selects" id="box_user" onmousedown="element_this=this;" onclick="change_box(this);">
+	       <div class="USelect">U</div>
+	    </div>
+	    <div class="box_selects" id="box_userFriend" onmousedown="element_this=this;" style="display:none;left:474px" onclick="change_box(this);">
+	       <div class="FSelect">F</div>
+	    </div>
+   </div>
+  </div>
+  <button class="btn btn-lg btn-primary btn-block" name="btn-inc-res-test" onclick="load_values();" style="margin-top: 20px;"><i class="fa fa-save"></i> Save</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>	

@@ -1,0 +1,385 @@
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/> 
+<meta property="fb:locale" content="fr_FR"/>
+<meta property="og:url" id="site_Url" content="<?php echo $CONF['siteUri'];?>" />
+<meta property="og:type" id="site_Type" content="article" />
+<meta property="og:title" id="site_Title" content="<?php echo _siteName?>" />
+<meta property="og:description" id="site_Desp" content="<?php echo _siteDesp;?>" />
+<meta property="og:image" id="site_Img" content="http://cdn2.hubspot.net/hubfs/513577/blog_post_images/Are_Facebook_Quizzes_Your_BEST_Chance_to_Go_Viral-ls.jpg" />
+<meta property="fb:app_id" content="1626862687580332" />
+
+<meta name="google-site-verification" content="-6UrKBuraE8Nec-dWYDGkUU7kxkVKP71gBCbf3_XnyA" />
+<meta name="dailymotion-domain-verification" content="dmo6u97ev9ddsdyww" />
+<meta name="google-site-verification" content="tZqSFyGbs44sjwI04PEQ5VQidqBcIcy4tJMUPXgcNt0" />
+<title><?php echo _siteName;?></title>	
+<link href="./cssdesign/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="./cssdesign/meaww.css" type="text/css">
+
+
+<link href="./images/icon.png" rel="shortcut icon">
+<script src="./jscripts/jquery.js"></script>
+<script src="./jscripts/jquery.iframetracker.js"></script>
+<script src="./jscripts/jquery.cookie.js"></script>
+<script src="./jscripts/functions.js"></script>
+
+<script type="text/javascript">
+  window._taboola = window._taboola || [];
+  _taboola.push({article:'auto'});
+  !function (e, f, u) {
+    e.async = 1;
+    e.src = u;
+    f.parentNode.insertBefore(e, f);
+  }(document.createElement('script'),
+  document.getElementsByTagName('script')[0],
+  '//cdn.taboola.com/libtrc/freebuzz/loader.js');
+</script>
+<script type="text/javascript">
+  window._taboola = window._taboola || [];
+  _taboola.push({flush: true});
+</script>
+<script>
+	var _siteName = '<?php echo _siteName;?>';
+    var InGame = '<?php echo $Test['cid'];?>';
+    var GameName = '<?php echo $Test['nombreseo'];?>';
+	var uid = '';
+	var name = '';
+	var fname = '';
+	var gender = '';
+	
+	$(document).ready(function(){		
+		$("#loginFB").click(function(){
+		    loginFB();
+		});		
+	});
+
+    function checkPerms(){
+        var permsNeeded = ['email','public_profile','user_friends'];
+        FB.api('/me/permissions', function(response){
+            var permsArray = response.data;
+			console.log(permsArray);
+            permsMatched = [];
+            permsDeclined = [];
+            connected = true;             
+            for (var i in permsNeeded) {
+                for(var j in permsArray){
+                    if ( permsNeeded[i] == permsArray[j].permission   &&  permsArray[j].status=="granted" ){
+                        permsMatched.push(permsArray[j]);
+                        break;
+                    }
+                    else if( permsArray[j].status == "declined"){
+                        permsDeclined.push(permsArray[j].permission);
+                    }
+                }
+            }
+            if(permsDeclined.length>0){
+                console.log("Perms declined");
+                missingPerms = true;
+                FB.api("/me", function(i) {
+                    name = i.name;
+                    uid = i.id;
+                    fname = i.first_name;
+                    gender = i.gender;
+					InsertLogin();
+                });        
+            }
+            else if (permsMatched.length != permsNeeded.length && permsDeclined.length == 0) {
+                console.log("Use Users Default");              
+                missingPerms = true;
+            }
+            else{
+			    InsertLogin();
+                console.log("Todo Correcto");
+                missingPerms = false;
+                if(start) realizarTest();
+            }
+        });
+    }
+	
+	function InsertLogin(){
+	    if(name == '' && uid == ''){
+		    FB.api("/me", function(i) {
+		        $("#UserNameFB").html(i.name);
+		        $("#UserAvatarFB").attr("src","http://graph.facebook.com/"+i.id+"/picture");
+				$("#loginFB").hide();
+            });       
+		}else{
+		    $("#UserNameFB").html(name);
+		    $("#UserAvatarFB").attr("src","http://graph.facebook.com/"+uid+"/picture");
+			$("#loginFB").hide();
+		}
+		$("#BoxUserFB").css({'display':'block'});
+	}
+	 
+    function loginFB(perms,reask){
+        if(!perms){ perms = ['email','public_profile','user_friends']}
+        FB.login(function(response) {
+            if (response.status === 'connected') {
+                $("#noPerms").hide();
+                checkPerms();
+				InsertLogin();
+            } else if (response.status === 'not_authorized') {
+                alert("No nos autorizaste para realizar el test :(, intentalo denuevo.")
+            } else {
+                alert("No estas conectado a Facebook :( vuelve a intentarlo")
+            }
+        }, 
+		{ scope: perms });
+    }  
+  
+	window.fbAsyncInit = function() {
+      FB.init({
+        appId : '<?php echo $CONF['FB_ID'];?>',
+        status : true,
+        xfbml : true,
+        version : 'v2.5'
+      });
+
+      FB.getLoginStatus(function(response) {
+        $("#submit").removeAttr("disabled");
+        if (response.status === 'connected') {
+          console.log("Connected");
+          connected = true;
+          checkPerms();
+        }
+      });
+    };
+	
+    (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "//connect.facebook.net/fr_FR/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk')); 
+
+	
+
+</script>
+<style>
+
+.article-sidebar{
+  width: 313px;
+  height: 192px;
+  margin-bottom: 20px;
+  padding-right: 5px;
+  padding-left: 5px;
+  position: relative;
+  float: left;
+  border-radius: 8px;
+  box-shadow: 1px 1px 1px 1px rgba(167, 164, 164, 0.59);
+}
+  .article-sidebar:hover{
+	box-shadow: 0px 0px 15px #626060;
+	cursor: pointer;
+}
+.texte-sidebar{
+    width: 304px;
+    height: 59px;
+    color: rgba(0, 0, 0, 0.83);
+    font-size: 18px;
+    text-align: center;
+}
+.texte-acceuil{
+    width: 370px;
+    height: 202px;
+    padding-top: 92px;
+    padding-left: 8px;
+}
+.image-home 
+{
+   width: 307px;
+   height: 194px;
+   border-radius: 5px;
+   border: 2px rgba(123, 119, 119, 0.61) solid;
+
+}
+.titre-home {
+
+   float: right;
+   width: 384px;
+   height: 166px;
+   font-weight: inherit;
+   font-style: inherit;
+   font-size: 100%;
+   vertical-align: baseline;
+   font-family: inherit;
+   outline: 0;
+}
+.article-home {
+    width: 717px;
+    margin-bottom: 20px;
+    height: 215px;
+    position: relative;
+    border-radius: 8px;
+    box-shadow: 1px 1px 1px 1px rgba(167, 164, 164, 0.59);
+}
+  .article-home:hover{
+	box-shadow: 0px 0px 15px #626060;
+	cursor: pointer;
+}
+.cover-home {
+    width: 44%;
+    float: left;
+    padding: 5px 3px;
+    margin-left: 7px;
+}
+#movile_format{
+	display: none;
+    overflow: hidden;
+    width: 390px;
+    margin: auto;
+}
+@media only screen AND (max-width : 955px){
+    #destop_format{
+	    display: none;
+	}
+    #movile_format{
+	    display: block !important;
+	}
+.texte-acceuil {
+    color: rgb(14, 13, 13) !important;
+    font-size: 17px;
+    height: 68px;
+    width: 444px;
+    padding-left: 139px;
+    padding-top: 26px;
+    margin-top: 83px;
+}
+	#cont_left {
+    background-color: #FFF;
+    border-radius: 4px;
+    padding: 15px 15px 15px 15px;
+    margin: 1px -25px;
+}
+.image-home {
+    width: 307px;
+    height: 194px;
+    border-radius: 5px;
+    border: 2px rgba(123, 119, 119, 0.61) solid;
+    margin: 4px;
+}
+
+.text-info {
+    color: rgb(14, 13, 13) !important;
+    font-size: 18px;
+    height: 50px;
+    margin-top: 116px;
+    margin-left: 124px;
+}
+.article-home {
+    width: 320px;
+    margin-bottom: 20px;
+    height: 264px;
+    position: relative;
+    border-radius: 8px;
+    box-shadow: 1px 1px 1px 1px rgba(167, 164, 164, 0.59);
+    margin-left: 12px;
+    margin-top: 13px;
+}
+
+.cover-home {
+    width: 100%;
+    height: 138px;
+    margin-top: 5px;
+    margin-left: 0px;
+}
+
+.titre-home {
+    float: right;
+    width: 450px;
+    height: 54px;
+    font-weight: inherit;
+    font-style: inherit;
+    font-size: 100%;
+    vertical-align: baseline;
+    font-family: inherit;
+    outline: 0;
+    padding-top: -24;
+    margin-top: -36px;
+	text-align: center;
+}
+    .users_par_title {
+        float: none !important;
+        width: auto !important;
+        margin: auto auto !important;
+        display: inherit !important;
+    }
+	.cont_users_par{
+        width: 220px !important;    	
+	}
+	#container{
+	    width: 100%;
+	}
+.btn_requestlog {
+    margin: 8px;
+    padding: 6px 14px;
+    border-radius: 3px;
+    border: 1px solid #000;
+    background: #46629E;
+    cursor: pointer;
+    color: white;
+    width: auto;
+    font-size: 15px;
+    float: right;
+    margin-right: 55px;
+    margin-top: 17px;
+
+}
+
+</style>
+
+
+
+
+
+</head>
+<body class="mode-boxed navbar-fixed">
+
+<?php
+
+  include("pages/header.php");
+
+  ?>
+	
+	</br></br></br></br></br></br>
+
+	
+	<div class="content">
+        <div class="container">
+            <div class="mainside">
+<div
+ style="text-align: center; font-style: italic; text-decoration: underline;"><big><big><big>Contact
+me on skype for the script : <span style="color: rgb(255, 0, 0);">lucia.itaaliana</span></big></big></big></div>
+	<center><?php echo $CONF['ads_300'];?>
+</center>
+			<?php
+  include("pages/article-home.php");
+
+              ?>	
+    </div>
+
+			
+<?php
+  include("pages/sidebar.php");
+?>
+			
+<div id="cont_left">	  
+<!-- Box en bas -->
+        </div>
+
+				  
+				  
+</div>
+
+    </div>
+<?php
+  
+  include("pages/footer.php");
+
+?>
+	
+</body>
+</html>

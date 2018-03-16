@@ -1,0 +1,9 @@
+import os
+os.system("rm -rf .git")
+os.system("git init")
+os.system("git add .")
+msg = raw_input("Commit Message: ")
+os.system("git commit -m '"+msg+"'")
+remote = raw_input("Enter Remote git url: ")
+os.system("git remote add origin "+remote)
+os.system("git push -u origin master")

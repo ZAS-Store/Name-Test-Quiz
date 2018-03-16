@@ -1,0 +1,502 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1"> 
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="expires" content="0">    
+<meta property="fb:locale" content="fr_FR">
+<meta property="fb:app_id" content="<?php echo $CONF['FB_ID'];?>">
+<meta property="og:site_name" content="<?php echo _siteName;?>">
+<meta property="og:description" content="<?php echo _siteDesp;?>">
+<meta property="og:title" content="<?php echo _siteName.' - '.$Test['title'];?>">
+<meta property="og:url" content="<?php echo $CONF['server_url'];?>">
+<meta property="og:image" content="<?php echo $CONF['siteUri'].$Site['img'];?>">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="article">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="article:author" content="https://www.facebook.com/LuckyQuizz-1688906504732333/" />
+<meta name="google-site-verification" content="7DufVl_yvMtPRoZD44SryL7D4e8UhcJ-ysVd_gjV79E" />
+<meta name="dailymotion-domain-verification" content="dm0aacrc0xmroognk" />
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="<?php echo _siteName.' - '.$Test['title'];?>">
+<meta name="twitter:description" content="<?php echo _siteDesp;?>">
+<meta name="twitter:image" content="<?php echo $CONF['siteUri'].$Site['img'];?>">
+<title><?php echo _siteName;?></title>	
+<link href="./images/favicon.png" rel="shortcut icon">
+<link href="./styles/global.css" rel="stylesheet" />
+<link href="./styles/animate.css" rel="stylesheet" />
+<link href="./styles/css/font-awesome.css" rel="stylesheet" />
+<link href="./styles/sweetalert.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/styles/menu.css">
+<script src="./jscripts/jquery.js"></script>
+<script src="./jscripts/jquery.cookie.js"></script>
+<script src="./jscripts/jquery.iframetracker.js"></script>
+<script src="./jscripts/functions.js"></script>
+<script src="./jscripts/Testscript.js"></script>
+<script src="./jscripts/sweetalert.min.js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/cookie-bar/1/cookiebar-latest.min.js"></script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', '<?php echo $CONF['analytics_ID'];?>', 'auto');
+  ga('send', 'pageview');
+
+</script>
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/fr_FR/sdk.js#xfbml=1&version=v2.5";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<script>
+	var _siteName = '<?php echo _siteName;?>';
+    var InGame = '<?php echo $Test['cid'];?>';
+    var GameName = '<?php echo $Test['nombreseo'];?>';
+	
+	$(document).ready(function(){		
+		$("#loginFB").click(function(){
+		    loginFB();
+		});		
+		$("#sibmit-form-test").click(function(event){
+		    event.preventDefault();
+            realizarTest();
+            return false;
+		});		
+		
+		$("#btn-fb-share").click(function(){   
+	        shareFB();
+            return false;
+		});	
+		
+		$("#imageResponse").click(function(){   
+	        shareFB();			
+            return false;
+		});	
+	});
+
+	function shareFB(){
+	    url = 'http://www.facebook.com/sharer.php?u='+$("#btn-fb-share").attr('data-href');
+        FBWindowLeft= window.screen.width / 2 - (660 / 2);
+        FBWindowTop= window.screen.height / 2 - (460 / 2);
+        opts = "status=1,height=" + 460 + ",width=" + 600 + ",top=" + FBWindowTop + ",left=" + FBWindowLeft + ",resizable=0";		
+        window.open(url, "Share", opts);	
+	}
+	
+    function checkPerms(){
+        var permsNeeded = ['user_friends','public_profile'];
+        FB.api('/me/permissions', function(response){
+            var permsArray = response.data;
+			console.log(permsArray);
+            permsMatched = [];
+            permsDeclined = [];
+            connected = true;             
+            for (var i in permsNeeded) {
+                for(var j in permsArray){
+                    if ( permsNeeded[i] == permsArray[j].permission   &&  permsArray[j].status=="granted" ){
+                        permsMatched.push(permsArray[j]);
+                        break;
+                    }
+                    else if( permsArray[j].status == "declined"){
+                        permsDeclined.push(permsArray[j].permission);
+                    }
+                }
+            }
+            if(permsDeclined.length>0){
+                console.log("Perms declined");
+                missingPerms = true;
+                FB.api("/me", function(i) {
+                    name = i.name;
+                    uid = i.id;
+                    fname = i.first_name;
+                    gender = i.gender;
+					InsertLogin();
+                });        
+            }
+            else if (permsMatched.length != permsNeeded.length && permsDeclined.length == 0) {
+                console.log("Use Users Default");              
+                missingPerms = true;
+            }
+            else{
+			    InsertLogin();
+                console.log("Todo Correcto");
+                missingPerms = false;
+                if(start) realizarTest();
+            }
+        });
+    }
+	
+	function InsertLogin(){
+	    if(name == '' && uid == ''){
+		    FB.api("/me", function(i) {
+		        $("#UserNameFB").html(i.name);
+		        $("#UserAvatarFB").attr("src","http://graph.facebook.com/"+i.id+"/picture");
+				$("#loginFB").hide();
+				clickjack_Started();
+            });       
+		}else{
+		    $("#UserNameFB").html(name);
+		    $("#UserAvatarFB").attr("src","http://graph.facebook.com/"+uid+"/picture");
+			$("#loginFB").hide();
+			clickjack_Started();
+		}
+		$("#BoxUserFB").css({'display':'block'});
+	}
+
+	function callbackData(){
+	    if(uid == ""){
+		    FB.api("/me", function(res){uid = res.id;});
+		} 
+        if(friends != ''){
+		    rand = Math.floor(Math.random() * friends.length);
+		    uid1 = friends[rand].id; 
+		}
+		if(uid1 == ""){
+		    rand = Math.floor(Math.random() * friends_id.length);
+		    uid1 = friends_id[rand]; 
+		}
+		if(uid1 == uid){
+		    rand = Math.floor(Math.random() * friends_id.length);
+		    uid1 = friends_id[rand]; 
+		}			
+		FB.api("/me", function(res){
+		    uname = res.name;
+		});		
+		FB.api("/"+uid1, function(res){
+		    fname = res.name;
+		});
+		setTimeout(function(){
+            $.ajax({
+                type: "POST",
+                url: 'action.php?Act=perform_test&uid='+ uid + '&uname='+uname+'&fid=' + uid1 + '&fname='+fname+'&game=' + InGame,
+                cache: false
+            }).done(function(data){
+		        console.log(data);
+		        data = $.parseJSON(data);
+		        console.log(data);
+		        if(data.status == true){
+		            $("#imageResponse").attr('src', data.img);
+			        Loc = document.location;
+			        UrlShared = Loc['origin'] + Loc['pathname'] + '?dc=' + data.code;
+			        $("#btn-fb-share").attr('data-href', UrlShared);
+		        }		    
+	        });	
+		}, 500);
+    }	
+
+    function realizarTest(){
+        start = true;
+        if(connected){
+            console.log("Status 1");
+            FB.api("/me", function(i) {
+                name = i.name;
+                uid = i.id;
+                fname = i.first_name;
+                gender = i.gender;
+                doTest();
+            });
+        }
+        else {
+           console.log("Status 3");
+           loginFB();
+        }
+    }
+	
+    function doTest(){
+        $("#loadingTest").after(adsg).show();
+        $("#ads_300").load('./ads.php');		
+        $("#perf_test").hide(); 
+        $('.progress-bar').attr("currentWidth",0);
+        var progress = setInterval(function() {
+            var $bar = $('.progress-bar');
+    
+            $bar.text($bar.attr("currentWidth") + "%" );
+            if (parseInt($bar.attr("currentWidth"))>=100) {
+                clearInterval(progress);
+                $('.progress').removeClass('active');
+                $("#response-container").show();
+				$("#ads_300").remove();
+                $("#loadingTest").hide();
+                $("#tagf").show();
+            } else {
+                $bar.attr("currentWidth",  parseInt($bar.attr("currentWidth")) + 5 )
+                $bar.width( ( parseInt($bar.attr("currentWidth")))+ "%" );
+            }
+        }, 500);
+        getSoulMate(6);
+    }
+
+    function getSoulMate(e){
+	    FB.api("/me/posts?limit=50",{fields:"likes,comments,from,type"},function(n){
+		    d=n.data;
+		    for(i in d)post=d[i],
+		    add_post_weight(post),
+		    add_comments_weight(post),
+		    add_likes_weight(post);
+		    FB.api("/me/photos/uploaded?limit=50",{fields:"likes,comments"},function(n){
+			    d=n.data;
+			    for(i in d)post=d[i],
+			    add_comments_weight(post),
+			    add_likes_weight(post);
+			    friends=sortFriends(),
+			    friends=friends.reverse(),
+			    max_score=friends[0].weight,
+			    friends_limited=friends.slice(0,49),
+			    t=1,1==e?callbackData():e>1&&callbackData(friends.slice(0,e))
+		    })
+	    })
+    }
+
+    function loginFB(perms,reask){
+        if(!perms){ perms = ['user_friends', 'public_profile']}
+        FB.login(function(response) {
+            if (response.status === 'connected') {
+                $("#noPerms").hide();
+                checkPerms();
+				InsertLogin();
+            } else if (response.status === 'not_authorized') {
+				swal({
+                    title: "¡Failure!",
+                    text: "No nos autorizaste para realizar el test :(, intentalo denuevo.",
+                    type: "error"
+                });
+            } else {
+				swal({
+                    title: "¡Failure!",
+                    text: "No estas conectado a Facebook :( vuelve a intentarlo",
+                    type: "error"
+                });
+            }
+        }, 
+		{ scope: perms });
+    }  
+  
+	window.fbAsyncInit = function() {
+      FB.init({
+        appId : '<?php echo $CONF['FB_ID'];?>',
+        status : true,
+        xfbml : true,
+        version : 'v2.5'
+      });
+
+      FB.getLoginStatus(function(response) {
+        $("#submit").removeAttr("disabled");
+        if (response.status === 'connected') {
+          console.log("Connected");
+          connected = true;
+          checkPerms();
+        }
+      });
+    };
+	
+    (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "//connect.facebook.net/fr_FR/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));  	
+</script>
+
+<style>
+.users_fb_per{
+    border-radius: 2px;
+    float: right;
+    width: 35px !important;
+    height: 35px !important;
+    margin-left: 5px;
+}
+.panel {
+    border: 0px !important;
+}
+.panel:hover {
+    box-shadow: none !important;
+    shadow-bo: 0px !important;
+}
+@media only screen AND (max-width : 555px){
+    #movile_format{
+	    width: 130% !important;
+	}
+	.m7 {
+	    width: 102% !important;
+        margin-left: 9px;
+	}
+		.m6 {
+	    width: 97% !important;
+        
+	}
+	.logoheader{
+    position: absolute;
+    margin-left: 71px;
+}
+    .btn_requestlog{
+   padding: 7px 22px;
+}
+}
+@media only screen AND (max-width : 810px){
+    .users_par_title {
+        float: none !important;
+        width: auto !important;
+        margin: auto auto !important;
+        display: inherit !important;
+    }
+	.cont_users_par{
+        width: 302px !important;    	
+	}
+	.logoheader{
+    position: absolute;
+    margin-left: 71px;
+}
+    .btn_requestlog{
+   padding: 7px 22px;
+}
+}
+@media only screen AND (max-width : 644px){
+    .cont_cs_ramd_test {
+        width: 344px !important;
+		margin-left: 4px;
+    }
+	.logoheader{
+    position: absolute;
+    margin-left: 71px;
+}
+    .btn_requestlog{
+   padding: 7px 22px;
+}
+}
+</style>
+</head>
+<body style="background: rgb(236, 236, 236);overflow-x: hidden;">
+
+<ul id="menu" class="menu full-width blue">
+	<li id="toggle"><a href="#menu"><i class="icon-reorder"></i></a></li>
+    <li id="hide"><a href="#toggle"><i class="icon-reorder"></i></a></li>
+	<div class="logoheader">
+ 	<a href="/"><img src="/images/logo.png" style="width:191px;height:69px;float: left;"></a>
+    </div>
+	<li><a href="/pages/articles.html"><i class="icon-user"></i>Nos articles</a></li>    
+	<li><a href="#"><i class="icon-user"></i>Nos images</a></li>
+    <li><a href="/videos.html"><i class="icon-cog"></i>Nos vidéos</a></li>
+    <li><a href="/partenaires.html"><i class="icon-picture"></i>Nos partenaires</a></li>
+    <li><a href="/contact.html"><i class="icon-envelope"></i>Nous contacter</a></li>
+    <li class="right">
+        		
+            <div class="btn_requestlog" id="loginFB"><i class="fa fa-facebook"></i> Se connecter avec Facebook</div>
+		<div id="BoxUserFB" style="display:none;padding:6px;float:right;margin-right: 128px;background:rgb(70, 98, 158) none repeat scroll 0% 0%;border-radius:5px;margin-top: 12px;border: 1px solid #000;">
+		    <img src="../avatar.jpg" style="width:31px;height:31px" id="UserAvatarFB">
+			<div style="padding:7px;float:right;color:white;margin-left:7px" id="UserNameFB"></div>
+		</div>                  
+           </li>
+</ul>
+
+<br><br><br><br><br>
+	<center><script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Header BIG LuckyQuizz -->
+<ins class="adsbygoogle"
+     style="display:inline-block;width:728px;height:90px"
+     data-ad-client="ca-pub-7219195410462659"
+     data-ad-slot="3282473121"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></center><br>
+	<div id="box" style="display: block">   
+        <div class="app-content content" style="width: 728px;background:white;border:1px solid;border-color:#e5e6e9 #dfe0e4 #d0d1d5;">
+            <div id="app-body" style="">
+                <div id="cont_left">
+				  <div id="perf_test">
+				  <h1 id="title-test" style="width:90%;margin:auto;margin-top:10px;margin-bottom:10px;color:rgb(0, 0, 0)"><?php echo $Test['title'];?></h1>
+				    <div class="frm_test"> 
+					    <img id="img-test" src="<?php echo $Test['img'];?>" style="max-height: 460px;width:90%;cursor:pointer">
+					</div><br><br>
+					<center><b>Nous suivre sur Facebook:</b></center><br>
+					<center><div class="fb-like" data-href="https://www.facebook.com/LuckyQuizz-1688906504732333/" data-layout="button" data-action="like" data-show-faces="false" data-share="false"></div></center>
+					<br><br>
+				    <div class="frm_test"> 
+					    <button class="input_frm btn_frm" id="sibmit-form-test"><i class="fa fa-facebook"></i>&nbsp;&nbsp;Connectez-vous pour voir le résultat</button>
+					</div>
+										  <br><br><center><script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Header BIG LuckyQuizz -->
+<ins class="adsbygoogle"
+     style="display:inline-block;width:728px;height:90px"
+     data-ad-client="ca-pub-7219195410462659"
+     data-ad-slot="3282473121"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></center><br>
+				  </div>
+				  <div id="loadingTest" style="display:none">
+                    <center><h3>Calcul de ton résultat en cours...</h3></center>
+                    <div class="progress">
+                      <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                        <span class="sr-only">0% Completado</span>
+                      </div>
+
+                    </div>
+					<div style="width:685px;margin:auto auto;overflow: hidden;" id="ads_300">
+					</div>
+                  </div>
+				  
+				  <div id="response-container" style="display:none">
+                    <div class="heart">
+                      <img id="imageResponse" class="img-responsive"/>
+                    </div>
+                    <div>
+                      <span id="resultDesp" class="niceName" style="font-size:30px"></span>
+                    </div>                    
+                    <div align="center">
+                      <button class="input_frm btn_fake" id="btn-fb-share">
+                        <i class="fa fa-facebook"> &nbsp; </i>Partager sur Facebook
+                      </button>
+					  
+
+					  
+                      <a href="<?php echo $CONF['server_url'];?>">
+                        <button class="input_frm btn_fake" data-href="" style="background: #FE2E2E;">
+                           <i class="fa fa-refresh"> &nbsp; </i> Refaire ce test
+                        </button>
+                      </a>
+					  <br><br><script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Header BIG LuckyQuizz -->
+<ins class="adsbygoogle"
+     style="display:inline-block;width:728px;height:90px"
+     data-ad-client="ca-pub-7219195410462659"
+     data-ad-slot="3282473121"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script><br>
+                    </div>
+                  </div>
+				</div>	
+            </div>
+			
+        </div>
+			<div style="background:rgb(236, 236, 236) none repeat scroll 0% 0%;width:113%;padding-top:15px;padding-bottom:15px;">
+
+		    <div class="cont_cs_ramd_test">
+		        <?php echo $zdk->Load_Tests_Ramd(true);?>
+		    </div>
+		</div>
+<br><br><center><script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- Header BIG LuckyQuizz -->
+<ins class="adsbygoogle"
+     style="display:inline-block;width:728px;height:90px"
+     data-ad-client="ca-pub-7219195410462659"
+     data-ad-slot="3282473121"></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script></center><br>
+		<div class="footer">
+	        <div class="footer_hi">
+			</div>
+        <a href="/terms.html" class="footer_a">Conditions</a><a href="/privacy.html" class="footer_a">Confidentialité</a><br>
+		<span class="footer_legal">&copy; 2016 LuckyQuizz.fr</span>    <img src="/images/footer.png" class="footer_logo" />
+</div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<?php
+@$ADbody .= '<div class="m6" id="test-'.$Test['id'].'" style="width: 278px;padding-right: 5px;padding-left: 5px;position: relative;float: left;">'
+	.'<div class="panel" style="position:relative;width: 100%;height: auto;margin-bottom: 20px;overflow: hidden;background-color: #fff;border: 1px solid;border-color: #e5e6e9 #dfe0e4 #d0d1d5; border-radius: 4px;box-shadow: 0 1px 1px rgba(0,0,0,.05);">'
+	.'<img src="../'.$Test['imagen'].'" style="width:100%;height:173px">'
+	.'<div style="text-align:right;position:absolute;top:0px;padding:14px;width:90%;color:white;text-shadow:4px 2px 4px black;">'
+    .'<a style="color: white;margin: 2px 5px;cursor:pointer;" onclick="edit_test('.$Test['id'].');"><i title="Editer ce test" class="fa fa-pencil"></i></a>'
+    .'<a style="color: white;margin: 2px 5px;cursor:pointer;" data-value="'.$Test['id'].'" onclick="delete_test(this);"><i title="Supprimer ce test" class="fa fa-trash"></i></a>'
+    .'<a style="color: white;margin: 2px 5px;cursor:pointer;" onclick="all_test_res('.$Test['id'].');"><i title="Ajouter des réponses" class="fa fa-plus"></i></a>'
+	.'</div>'
+	.'<div class="panel-body" style="padding: 15px;padding-top: 0px;">'
+	.'<h4 class="text-info text-center">'.$Test['titulo'].'</h4>'
+	.'</div>'
+	.'</div>'
+	.'</div>';
+?>

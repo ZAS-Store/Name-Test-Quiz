@@ -1,0 +1,92 @@
+<?php
+    $query = $db->query("SELECT * FROM ".TABLE_PREFIX."result WHERE id_test='".$_GET['tid']."' ORDER BY id DESC LIMIT 1");
+	$Ustyles = 'display:none;';
+	$Fstyles = 'display:none;left:474px';
+	if($db->num_rows($query)){
+	    $Test = $db->fetch_array($query);	
+	    if($Test['user_av'] != 'status:100'){
+	        $Duser = $zdkCore->SR_Array($Test['user_av']);			
+	        $Ustyles = "top: ".$Duser['y']."px;left: ".$Duser['x']."px;width: ".$Duser['s']."px;height: ".$Duser['s']."px;";
+	    }	
+	    if($Test['friend_av1'] != 'status:100'){
+	        $Dfriend = $zdkCore->SR_Array($Test['friend_av1']);
+	        $Fstyles = "top: ".$Dfriend['y']."px;left: ".$Dfriend['x']."px;width: ".$Dfriend['s']."px;height: ".$Dfriend['s']."px;";
+	    }	
+		$v1 = false;
+		$v2 = false;
+		$v3 = false;
+		if($Test['friend_av1'] != 'status:100' AND $Test['user_av'] != 'status:100'){
+		    $v2 = "selected";
+		}elseif($Test['user_av'] != 'status:100' AND $Test['friend_av1'] == 'status:100'){
+		    $v1 = "selected";
+		}elseif($Test['user_av'] == 'status:100' AND $Test['friend_av1'] != 'status:100'){
+		    $v3 = "selected";
+	
+		}
+	}
+	
+    $ADbody = '<div class="container-header" onclick="all_test_res('.$_GET['tid'].');" style="margin-bottom: 35px;">'     
+        .'<div class="header-cont">'
+	        .'<div class="icon"><i class="fa fa-mail-reply-all"></i> Resultados </div>'
+	        .'<div class="title-in">'.$zdkCore->get_name_test($_GET['tid']).'</div>'
+		.'</div>'					
+	.'</div>'				
+	.'<div class="container-form" style="width: 100%;">'
+	.'<div id="box_avance_edit" style="display:none;">'
+	.'<div class="module-bx-3f">'
+	.'<div class="container-input">'                      
+	.'<div class="icon"><i class="fa fa-photo"></i> Select Imagen</div>'
+	.'      <div class="box-btn-poss-x" align="center" style="height: auto;padding-top: 3px;">'
+	.'	       <select onchange="opt_mode_users(this)" name="mode_users" id="mode_users">'
+    .'            <option '.$v1.' value="1">1 avatar (user)</option>'
+    .'            <option '.$v2.' value="2">2 avatars (user AND friend)</option>'
+    .'            <option '.$v3.' value="3">1 avatar (friend)</option>'
+	.'         </select>'
+	.'	    </div>'
+	.'</div>'		
+    .'   <div class="box-text-edit">'
+    .'      <img class="img-fond" id="img-fond-prepare">'
+	.'	    <div class="box_selects" id="box_user" style="'.$Ustyles.'">'
+	.'	       <div class="USelect">U</div>'
+	.'	       <div class="box-resize"></div>'
+	.'	    </div>'
+	.'	    <div class="box_selects" id="box_userFriend" style="'.$Fstyles.'">'
+	.'	       <div class="FSelect">F</div>'
+	.'	       <div class="box-resize"></div>'
+	.'	    </div>'
+    .'   </div>'
+    .'  </div>'
+    .'  <button onclick="load_values();Add_test_res('.$_GET['tid'].');" style="margin-top: 20px;"><i class="fa fa-save"></i> Save</button>'
+    .'</div>'
+	
+	.'<div id="img_loading" style="display:none;background: url(../images/spinner.gif);width: 72px;height: 72px;background-size: 100% 100%;margin: auto auto;"></div>'
+	
+	.'<form action="" id="frm-data-res" method="POST" enctype="multipart/form-data">'
+	.'<input type="hidden" name="test_id" value="'.$_GET['tid'].'">'
+	.'<input type="hidden" id="data_user" name="data_user" />'
+	.'<input type="hidden" id="data_userFriend" name="data_userFriend" />'
+	
+    .'<div id="box_vasic_info">'
+	
+	.'<div class="container-input">'                      
+	.'<div class="icon"><i class="fa fa-home"></i> Titulo del resultado</div>'
+	.'<input type="text" placeholder="Titulo del resultado" name="title" id="title">' 
+    .'</div>'
+	
+	.'<div class="container-input">'    
+	.'<div class="icon"><i class="fa fa-photo"></i> Select Imagen</div>'
+	.'<input type="file" name="imagenTest" id="imagenTest" class="img_select_hidden" onchange="validate_fileimg(this);preview_img(this);" style="margin: 8px;">' 
+	.'</div>'				
+			  
+	.'<div class="container-input">'     
+    .'<div class="header-cont-textarea">'
+	.'<div class="icon"><i class="fa fa-pencil"></i> Descripcion </div>'
+	.'<div class="title-ads">Descripcion del resultado</div>'
+	.'</div>'					
+	.'<textarea placeholder="Descripcion del resultado aqui" name="des" id="des" style="min-width: 559px;max-width: 559px;"></textarea>'
+	.'</div>'	
+    .'<button onclick="next_prss();return false;"><i class="fa fa-angle-double-right"></i> Siguente</button>'
+    .'</div>'
+    .'</form>'
+    .'</div>';	
+?>

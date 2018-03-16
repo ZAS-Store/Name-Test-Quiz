@@ -1,0 +1,80 @@
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<meta charset="UTF-8">
+		<title>NametestsCloneScript.com - Admin Panel</title>
+		<link href="../styles/css/font-awesome.css" rel="stylesheet">
+        <link href="./inc/style.css" rel="stylesheet">
+        <link href="../styles/sweetalert.css" rel="stylesheet">
+        <link href="./inc/css/jquery-ui-dialog.css" rel="stylesheet">
+        <script src="../jscripts/jquery.js"></script>
+		<script type="text/javascript" src="./inc/js/jquery.ui.js"></script>
+        <script src="../jscripts/sweetalert.min.js"></script>
+        <script>
+		    var inPage = '<?php echo $InPage;?>';
+			var pages = {
+				'Home':'167px', 
+				'AllTest':'222px', 
+				'NewTest':'277px', 
+			    'Stats':'332px', 
+			    'config':'387px'
+			};
+			$(document).ready(function(){
+				console.log(pages[inPage]);
+				$(".indicator-naw").css({'top': pages[inPage]});
+				change_admin_page();
+			});
+			
+			var change_admin_page = function(){
+			    $(".menu-naw").click(function(){
+				    inPage = $(this).attr('data-value');
+					$(".indicator-naw").css({'top': pages[inPage]});
+					$.ajax({
+					    url: './index.php?Act='+inPage,
+						type: 'POST'
+					}).done(function(i){
+					    $(".container-right").html(i);
+					});
+				});
+			} 
+		</script>
+        <script src="./inc/zdk-functions.js"></script>
+	</head>
+	<body>
+		<div class="container" style="">
+            <div class="container-left">
+			    <div class="cont-user">
+				    <div class="avatar"></div>
+					<div class="username">
+					    <strong><?php echo $_USER['username'];?></strong>
+						<a href="./index.php?Act=logout" style="text-decoration: none;"><div style="margin-top:5px;padding:2px;background:#00B8FF;border-radius:3px;color:white;cursor:pointer;">Deconnexion</div></a>
+				    </div>
+				</div>
+				<div class="menu-naw" data-type="naw" data-value="Home">
+				    <div class="icon"><i class="fa fa-home"></i></div>		
+					<div class="title">Dashboard</div>
+				</div>
+				<div class="menu-naw" data-type="naw" data-value="AllTest">
+				    <div class="icon"><i class="fa fa-table"></i></div>		
+					<div class="title">Les Tests</div>
+				</div>
+				<div class="menu-naw" data-type="naw" data-value="NewTest">
+				    <div class="icon"><i class="fa fa-plus"></i></div>		
+					<div class="title">Ajouter un Test</div>
+				</div>
+				<div class="menu-naw" data-type="naw" data-value="Stats">
+				    <div class="icon"><i class="fa fa-area-chart"></i></div>		
+					<div class="title">Statistiques</div>
+				</div>
+				<div class="menu-naw" data-type="naw" data-value="config">
+				    <div class="icon"><i class="fa fa-cog"></i></div>		
+					<div class="title">Configurations</div>
+				</div>
+			</div>
+			<div class="indicator-naw"></div>
+            <div class="container-right">
+			    <?php echo $ADbody; ?>
+			</div>
+		</div>
+	</body>
+</html>
